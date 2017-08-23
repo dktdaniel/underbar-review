@@ -97,20 +97,14 @@
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
-    // var sortedArray = array.slice();
-    // if (isSorted === undefined || !isSorted) {
-    //   sortedArray.sort();
-    // }
-    // _.each(sortedArray, function(element, index) {
-    //   if (sortedArray.indexOf(element) !== index) {
-    //     sortedArray.splice(index, 1);
-    //   }
-    // });
-    
-    // return sortedArray;
-    var set = new Set(array);
-    var arr = [...set];
-    return arr;
+    var iterator = iterator || _.identity;
+    var valueTracker = {};
+    _.each(array, function(el) {
+      if (!valueTracker.hasOwnProperty(iterator(el))) {
+        valueTracker[iterator(el)] = el;
+      }
+    });
+    return Object.values(valueTracker);
   };
 
 
@@ -119,6 +113,11 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var mappedArr = [];
+    _.each(collection, function(el) {
+      mappedArr.push(iterator(el));
+    });
+    return mappedArr;
   };
 
   /*
@@ -160,6 +159,30 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    var init = accumulator === undefined;
+    
+    _.each(collection, function(item) {
+      if (init) {
+        accumulator = item;
+        init = false;
+      } else {
+        accumulator = iterator(accumulator, item);
+      }
+    });
+
+    // if (accumulator !== undefined) {
+    //   for (var i = 0; i < collection.length; i++) {
+    //     accumulator = iterator(accumulator, collection[i]);
+    //   }
+    // } else {
+    //   accumulator = collection[0];
+    //   for (var j = 1; j < collection.length; j++) {
+    //     accumulator = iterator(accumulator, collection[j]);
+    //   }
+    // }
+      
+    return accumulator;
+    //return accumulator after every element in collection is iterated over
   };
 
   // Determine if the array or object contains a given value (using `===`).
